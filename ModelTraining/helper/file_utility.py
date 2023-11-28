@@ -3,6 +3,7 @@ import zipfile
 import tarfile
 import shutil
 import random
+import logging
 
 
 def move_to_destination(origin, destination, percentage_split):
@@ -35,7 +36,7 @@ def prepare_files(cat_dog_source, bird_source, base_dir, percent_to_move=0.8):
         for image in os.listdir(subdir_path):
             shutil.move(os.path.join(subdir_path, image), os.path.join(base_birds_dir))
 
-    # print(f"There are {len(os.listdir(base_birds_dir))} images of birds")
+    logging.info(f"There are {len(os.listdir(base_birds_dir))} images of birds")
     # remove corrupt images
 
     os.system('find ' + base_dir + ' -size 0 - exec rm {} +')
@@ -57,3 +58,13 @@ def prepare_files(cat_dog_source, bird_source, base_dir, percent_to_move=0.8):
     move_to_destination(base_cats_dir, os.path.join(base_dir, 'valid/cats'), 1)
     move_to_destination(base_dogs_dir, os.path.join(base_dir, 'valid/dogs'), 1)
     move_to_destination(base_birds_dir, os.path.join(base_dir, 'valid/birds'), 1)
+
+    # remove corrupt images
+    for fldr in train_eval_dirs:
+        for fl in os.listdir(os.path.join(base_dir, fldr)):
+            if os.path.getsize(os.path.join(os.path.join(base_dir, fldr), fl)) == 0:
+                os.remove(os.path.join(os.path.join(base_dir, fldr), fl))
+                logging.info(f'deleting file {fl} - empty')
+            if not fl.endswith('.jpg'):
+                os.remove(os.path.join(os.path.join(base_dir, fldr), fl))
+                logging.info(f'deleting file {fl} - not picture')

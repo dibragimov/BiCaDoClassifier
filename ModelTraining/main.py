@@ -6,7 +6,8 @@ import numpy as np
 import logging
 import tensorflow as tf
 import argparse
-import helper
+import helper.file_utility
+import helper.plot_utility
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
@@ -15,11 +16,21 @@ import helper
 def train_image_classifier(base_dir):
     logging.info(f'Training, using {base_dir}')
     # Check if one file exists. If it does not exist - download files
+    need_preparation = False
     if not os.path.exists(os.path.join(base_dir, 'kagglecatsanddogs_3367a.zip')):
+        need_preparation = True
+        logging.info('File 1 is downloading')
         os.system('wget -c https://dmmlcnndata.s3.amazonaws.com/kagglecatsanddogs_3367a.zip -P ' + base_dir)
+    # second check - after this if both files exist it will not prepare files.
+    # if either one is missing - system is not ready - shall prepare files
+    if not os.path.exists(os.path.join(base_dir, 'kagglecatsanddogs_3367a.zip')):
+        need_preparation = True
+        logging.info('File 2 is downloading')
         os.system('wget -c https://dmmlcnndata.s3.amazonaws.com/CUB_200_2011.tar -P ' + base_dir)
 
-        # run filehelper to unzip and create train/test
+    # run filehelper to unzip and create train/test
+    if need_preparation or not os.path.exists(os.path.join(base_dir, 'PetImages')):
+        logging.info('Unzipping files')
         helper.file_utility.prepare_files(os.path.join(base_dir, 'kagglecatsanddogs_3367a.zip'),
                                           os.path.join(base_dir, 'CUB_200_2011.tar'),
                                           base_dir)
@@ -92,6 +103,7 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     if args.data_dir:
         logging.info(f'Data Folder: {args.data_dir}')
+    # start training
     with tf.device('/GPU:0'):
         train_image_classifier(args.data_dir)
 
