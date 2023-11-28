@@ -68,3 +68,11 @@ def prepare_files(cat_dog_source, bird_source, base_dir, percent_to_move=0.8):
             if not fl.endswith('.jpg'):
                 os.remove(os.path.join(os.path.join(base_dir, fldr), fl))
                 logging.info(f'deleting file {fl} - not picture')
+
+
+def load_inception_weights(base_dir):
+    if not os.path.exists(os.path.join(base_dir, 'inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5')):
+        need_preparation = True
+        logging.info('File with weights is downloading')
+        os.system('wget --no-check-certificate -c https://storage.googleapis.com/mledu-datasets/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5 -P ' + base_dir)
+    return os.path.join(base_dir, 'inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5')
