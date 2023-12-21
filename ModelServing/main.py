@@ -42,6 +42,7 @@ def home():
 async def predict(request: Request):
     # read json
     data = await request.json()
+    print('data', str(data)[100])
     # get the content from list (for now it contains one item)
     data_image = data['image'][0]
     data_image = str(data_image)
@@ -59,6 +60,11 @@ async def predict(request: Request):
     image = tf.keras.preprocessing.image.img_to_array(image)
     data_point = np.expand_dims(image, axis=0)
     # do prediction
+    global inception_model
+    if inception_model is None:
+        settings = Dynaconf(settings_files=["config/settings.toml"])
+        model_dir = settings['MODEL_PATH']
+        inception_model = tf.keras.models.load_model(model_dir, compile=True)
     pred = inception_model.predict(data_point/255.0).tolist()
     pred = pred[0]  # first value as we have only 1 image
     classid = np.argmax(pred, axis=0)
